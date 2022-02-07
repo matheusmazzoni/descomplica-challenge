@@ -27,8 +27,8 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v2
       with:
-        context: applications/web/
-        file: ./Dockerfile
+        context: .
+        file: ./applications/web/Dockerfile
         push: false
         tags: ${{ env.DOCKER_IMAGE }}
 

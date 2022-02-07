@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      DOCKER_IMAGE: matheusmazzoni/descomplica-web
+      DOCKER_IMAGE: 'matheusmazzoni/descomplica-web:${{ github.sha }}'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -30,7 +30,7 @@ jobs:
         context: applications/web/
         file: ./Dockerfile
         push: false
-        tags: ${{ env.DOCKER_IMAGE }}:$GITHUB_SHA
+        tags: ${{ env.DOCKER_IMAGE }}
 
     - name: Test Application
       run: yarn test
@@ -38,4 +38,4 @@ jobs:
       continue-on-error: true
     
     - name: Push to docker repository
-      run: docker image push ${{ env.DOCKER_IMAGE }}:$GITHUB_SHA
+      run: docker image push ${{ env.DOCKER_IMAGE }}

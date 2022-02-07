@@ -26,7 +26,7 @@ jobs:
       continue-on-error: true
 
     - name: Build Docker image
-      run: docker image build --file .Dockerfile --tag ${{ env.DOCKER_IMAGE }}
+      run: docker image build . --file .Dockerfile --tag ${{ env.DOCKER_IMAGE }}
 
     - name: Test Application
       run: docker container run --rm ${{ env.DOCKER_IMAGE }} yarn test

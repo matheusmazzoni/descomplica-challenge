@@ -1,23 +1,22 @@
 version: '3.9'
 
 services:
-  date-api:
+  descomplica-api:
     build: ./api
-    container_name: date-api
-    hostname: date-api
+    container_name: descomplica-api
+    hostname: descomplica-api
     restart: always
     ports:
       - 3000:3000
     environment:
       PORT: 3000
 
-  web:
+  descomplica-web:
     build: ./web
-    container_name: website
-    hostname: website
+    container_name: descomplica-web
+    hostname: descomplica-web
     restart: always
     ports:
       - 80:3000
     environment:
       PORT: 3000
-      DATE_API_URL: http://date-api:3000

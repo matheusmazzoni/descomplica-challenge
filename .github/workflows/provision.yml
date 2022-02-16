@@ -1,0 +1,40 @@
+name: Provision Terraform
+
+on: 
+  push:
+  pull_request:
+    branches:    
+      - 'main'
+    paths:
+      - 'infrastructure/provision/*'
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        terraform: [ 1.0.9 ]
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1.2.1
+        with:
+          terraform_version: ${{ matrix.terraform }}
+
+      - name: Configure AWS credentials                          
+        uses: aws-actions/configure-aws-credentials@v1           
+        with:                                                    
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}        
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}        
+          
+      - name: Initialize infrastruture
+        run: terraform init
+
+      - name: Provision infrastruture
+        run: terraform apply -auto-approve -var-file="vars/dev.tfvars"

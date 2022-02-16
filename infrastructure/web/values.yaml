@@ -1,0 +1,28 @@
+fullnameOverride: descomplica-web
+replicaCount: 2
+
+container:
+  image: ""
+  pullPolicy: Alway
+  port: 3000
+  protocol: TCP
+  liveness: {}
+  readiness: {}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+service:
+  type: ClusterIP
+  port: 3000
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

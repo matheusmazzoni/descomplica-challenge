@@ -1,0 +1,18 @@
+# apiVersion: networking.gateway.io/v1alpha3
+# kind: Gateway
+# metadata:
+#   name: descomplica-gateway 
+# spec:
+#   selector:
+#     gateway: ingressgateway
+#   servers:
+#   - port:
+#       number: 80
+#       name: http
+#       protocol: HTTP
+#     hosts:
+#     - descomplica.dev
+
+port: 80    
+hosts: 
+  - descomplica.dev

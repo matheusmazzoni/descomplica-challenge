@@ -4,18 +4,17 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 3000;
-const dateurl = process.env.DATE_API_URL || 'http://localhost:3000';
 
 app.set('views', path.join(__dirname, 'public/views'));
 app.set('view engine', 'ejs');
 
 app.get('/', function(_, res) {
 
-  axios.get(dateurl + '/api/date')
+  axios.get('http://ifconfig.me')
   .then(callresp => {
-    const datetime = callresp.data;
+    const ip = callresp.data;
     res.render('pages/index', {
-      datetime: datetime
+      ip: ip
     });
   })
   .catch(err => {

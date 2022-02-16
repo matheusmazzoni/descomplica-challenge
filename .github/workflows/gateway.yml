@@ -1,0 +1,48 @@
+name: Istio Gateway Setup
+
+on: 
+  push:
+  pull_request:
+    branches:    
+      - 'main'
+    paths:
+      - 'infrastructure/gateway/*'
+jobs:
+  setup-isitio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials                          
+        uses: aws-actions/configure-aws-credentials@v1           
+        with:                                                    
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}        
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}        
+          
+      - name: Create kubeconfig
+        run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.CLUSTER_NAME }}
+        
+      - name: Configure helm istio repository 
+        run: |
+          helm repo add istio https://istio-release.storage.googleapis.com/charts
+          helm repo update
+
+      - name: Update/Install base istio chart
+        run: helm upgrade --install istio-base istio/base --namespace istio-system --create-namespace
+
+      - name: Update/Install istiod chart
+        run: helm upgrade --install istiod istio/istiod --namespace istio-system --wait
+
+      - name: Update/Install an ingress gateway
+        shell: bash
+        timeout-minutes: 2
+        run: |
+          kubectl create namespace istio-ingress --dry-run=client -o yaml | \
+          sed  '/^metadata:/a\ \ labels: {"istio-injection":"enabled"}' | kubectl apply -f - 
+          helm upgrade --install istio-ingress istio/gateway --namespace istio-ingress --wait
+     
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Create a Gateway
+        working-directory: infrastructure/gateway
+        run: helm upgrade --install gateway ./ --namespace istio-ingress

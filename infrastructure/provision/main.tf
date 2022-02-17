@@ -1,3 +1,52 @@
+terraform {
+  required_version = ">= 1.0.9"
+
+  backend "s3" {
+    bucket         = "sltools-terraform-state"
+    key            = "states/terraform.tfstate"
+    region         = "us-west-1"
+    dynamodb_table = "sltools-terraform-locks"
+    encrypt        = true
+  }
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.6"
+    }
+  }
+}
+
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "descomplica-mazzoni-terraform-state"
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_s3_bucket_versioning" "versioning_terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_acl" "this" {
+  bucket = aws_s3_bucket.terraform_state.id
+  acl    = "private"
+}
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = "sltools-terraform-locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
 locals {
   env_prefix   = var.environment == "production" ? "prd" : (var.environment == "staging" ? "stg": "dev")
   vpc_name     = "${local.env_prefix}-${var.vpc_name}"
@@ -58,7 +107,7 @@ module "network" {
 ### EKS ###
 module "eks" {
   source = "terraform-aws-modules/eks/aws"
-  version = "18.3.1"
+  version = "18.7.2"
 
   cluster_name                    = local.cluster_name
   cluster_version                 = var.cluster_version
@@ -75,8 +124,8 @@ module "eks" {
     }
   }
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  vpc_id     = module.network.vpc_id
+  subnet_ids = module.network.private_subnets
 
   create_iam_role              = true
   iam_role_name                = "${local.cluster_name}-role"
@@ -93,7 +142,7 @@ module "eks" {
     default_ng = {
       name            = "${local.cluster_name}-ng"
       use_name_prefix = true
-      subnet_ids      = module.vpc.private_subnets
+      subnet_ids      = module.network.private_subnets
 
       min_size       = 1
       max_size       = 5

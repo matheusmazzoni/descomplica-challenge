@@ -5,7 +5,7 @@ const app = express();
 // Routes
 app.get('/api/sleep', function(req, res) {
   const datetime = new Date().toUTCString();
-  sleep(process.env.SLEEP_TIME || 2000)
+  sleep(process.env.SLEEP_TIME)
   return res.status(200).send(datetime);
 });
 

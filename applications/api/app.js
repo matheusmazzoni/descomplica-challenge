@@ -3,14 +3,17 @@ require("dotenv").config();
 const app = express();
 
 // Routes
-// app.get('/api/health', function(req, res) {
-
-// });
-
-app.get('/api/date', function(req, res) {
+app.get('/api/sleep', function(req, res) {
   const datetime = new Date().toUTCString();
+  sleep(process.env.SLEEP_TIME || 2000)
   return res.status(200).send(datetime);
 });
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 
 const port = process.env.PORT || 3000;
